@@ -1,7 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
-
 namespace RawSqlLib
 {
     [ExcludeFromCodeCoverage]
@@ -36,7 +35,7 @@ namespace RawSqlLib
             }
 
             _reader = await _comando.ExecuteReaderAsync(cancellationToken);
-            Console.WriteLine(_comando.CommandText);
+            //Console.WriteLine(_comando.CommandText);
             if (_reader is null)
             {
                 Fecha();

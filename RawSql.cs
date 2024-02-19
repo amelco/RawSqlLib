@@ -18,7 +18,7 @@ namespace RawSqlLib
         public Task<T?> QueryAsync<T>(string sql, Func<SqlDataReader, T> mapeamento, CancellationToken cancellationToken)
         {
             var conexao = new SqlServerConnectionManager(_connString, sql);
-            Task<T?> resultado = conexao.QueryAsync(parametros, mapeamento, cancellationToken);
+            Task<T?> resultado = conexao.QueryAsync(parametros.Count == 0 ? null : parametros, mapeamento, cancellationToken);
             parametros.Clear();
             return resultado;
         }
@@ -29,6 +29,11 @@ namespace RawSqlLib
             Task<bool> resultado = conexao.NonQueryAsync(parametros, cancellationToken);
             parametros.Clear();
             return resultado;
+        }
+
+        public void AddNullableParam(string name, SqlDbType dbType, object? value)
+        {
+            parametros.Add(new SqlParam { ParamName = name, ParamDbType = dbType, ParamValue = value });
         }
 
         public void AddParam(string name, SqlDbType dbType, object value)
