@@ -6,5 +6,6 @@ namespace RawSqlLib
     {
         public Task<T?> QueryAsync<T>(List<SqlParam> parametros, Func<SqlDataReader, T> funcao, CancellationToken cancellationToken);
         public Task<bool> NonQueryAsync(List<SqlParam> parametros, CancellationToken cancellationToken);
+        public Task<bool> ExecuteTransactionAsync(string[] sql, CancellationToken cancellationToken);
     }
 }

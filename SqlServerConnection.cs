@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using RawSqlLib.Exceptions;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 namespace RawSqlLib
@@ -9,12 +10,19 @@ namespace RawSqlLib
         private SqlConnection? _conexao;
         private SqlCommand? _comando;
         private SqlDataReader? _reader;
+        private SqlTransaction? transacao;
         private string _connString = "";
 
         public SqlServerConnectionManager(string connString, string sql)
         {
             _connString = connString;
             AbreComString(sql);
+        }
+
+        public SqlServerConnectionManager(string connString, string[] sql)
+        {
+            _connString = connString;
+            AbreTransacao(sql);
         }
 
 
@@ -86,6 +94,34 @@ namespace RawSqlLib
             return true;
         }
 
+        public async Task<bool> ExecuteTransactionAsync(string[] sql, CancellationToken cancellationToken)
+        {
+            if (_comando is null || transacao is null)
+            {
+                Fecha();
+                return false;
+            }
+
+            foreach (var s in sql)
+            {
+                _comando.CommandText = s;
+                try
+                {
+                    await _comando.ExecuteNonQueryAsync(cancellationToken);
+                }
+                catch (Exception e)
+                {
+                    transacao.Rollback();
+                    Fecha();
+                    throw new RawSqlException(e.Message);
+                    //return false;
+                }
+            }
+            transacao.Commit();
+            Fecha();
+            return true;
+        }
+
         private void AbreComString(string sql)
         {
             try
@@ -105,9 +141,36 @@ namespace RawSqlLib
                 cmd.Parameters.Clear();
                 _comando = cmd;
             }
-            catch
+            catch (Exception e)
             {
-                throw;
+                throw new RawSqlException(e.Message);
+            }
+        }
+
+        private void AbreTransacao(string[] sql)
+        {
+            try
+            {
+                _conexao = new SqlConnection(_connString);
+                if (_conexao == null)
+                {
+                    return;
+                }
+                _conexao.Open();
+                //Console.WriteLine("Abriu conexao!");
+                var cmd = _conexao.CreateCommand();
+                if (cmd == null)
+                {
+                    return;
+                }
+                cmd.Parameters.Clear();
+                _comando = cmd;
+                transacao = _conexao.BeginTransaction();
+                _comando.Transaction = transacao;
+            }
+            catch (Exception e)
+            {
+                throw new RawSqlException(e.Message);
             }
         }
 
@@ -123,5 +186,6 @@ namespace RawSqlLib
         {
             _comando!.Parameters.Add(parametro, tipoSql).Value = valor ?? DBNull.Value;
         }
+
     }
 }

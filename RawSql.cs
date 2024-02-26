@@ -31,6 +31,14 @@ namespace RawSqlLib
             return resultado;
         }
 
+        public Task<bool> TransactionAsync(string[] sql, CancellationToken cancellationToken)
+        {
+            var conexao = new SqlServerConnectionManager(_connString, sql);
+            Task<bool> resultado = conexao.ExecuteTransactionAsync(sql, cancellationToken);
+            parametros.Clear();
+            return resultado;
+        }
+
         public void AddNullableParam(string name, SqlDbType dbType, object? value)
         {
             parametros.Add(new SqlParam { ParamName = name, ParamDbType = dbType, ParamValue = value });
