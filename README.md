@@ -2,7 +2,14 @@
 
 This library is a simple wrapper to make the use of raw sql queries simpler.
 
+I believe its better to learn actual SQL than some DTO  abstractions. 
+When things get complicated, you use SQL to solve it.
+
 It is NOT ready for production yet.
+
+## Advantages
+- There is no use of DTO's of any kind
+- Use of raw sql queries (learn SQL instead of 
 
 ## Usage
 
