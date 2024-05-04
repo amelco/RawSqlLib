@@ -1,4 +1,4 @@
-﻿
+
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 
@@ -9,6 +9,7 @@ namespace RawSqlLib
     {
         public string ParamName { get; set; }
         public SqlDbType ParamDbType { get; set; }
-        public object ParamValue { get; set; }
+        public object? ParamValue { get; set; }
+        public bool WithoutQuote { get; set; } = false;
     }
 }

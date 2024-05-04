@@ -2,7 +2,14 @@
 
 This library is a simple wrapper to make the use of raw sql queries simpler.
 
+I believe its better to learn actual SQL than some DTO  abstractions. 
+When things get complicated, you use SQL to solve it.
+
 It is NOT ready for production yet.
+
+## Advantages
+- There is no use of DTO's of any kind
+- Use of raw sql queries (learn SQL instead of 
 
 ## Usage
 
@@ -29,6 +36,14 @@ public class ExampleRepository
             return retorno;
         }
 
+        // Executes a batch of non-queryable (non-SELECTs) operations
+        // Only return true if ALL operations are succesfull
+        public async Task<bool> Transaction(string[] sql, CancellationToken cancellationToken)
+        {
+            bool success = sql.TransactionAsync(new string[] { "INSERT INTO Example VALUES ('A Value');", "INSERT INTO AnotheTable VALUES ( 'Another Value');" }, CancellationToken.None).Result;
+            return success;
+        }
+
         private Example ExampleMapping(SqlDataReader reader)
         {
             return new Example
@@ -44,7 +59,7 @@ public class ExampleRepository
 In the example code, there is an Example entity that represents a table in the database with the fields id, name and email, in that order.
 The mapping of the table elements to the Example class is done in the ExampleMapping() function. This function is passed as a argument (delegate) to the QueryAsync() method.
 The mapping of the delegate function uses a implemented extension of the SqlDataReader class that gets the value of the database field.
-This extension needs the type of the database field.
+This extension needs the type of the database field. 
 
 ## TODO
 - [] Translate all method names to english
