@@ -9,12 +9,35 @@ namespace RawSqlLib
     {
         public readonly string _connString = "";
         private List<SqlParam> parametros = new();
+        private bool _debug = false;
 
-        public RawSql(string connString)
+        public RawSql(string connString, bool debug = false)
         {
             _connString = connString;
+            _debug = debug;
         }
 
+
+        /// <summary>
+        /// Retorna o comando SQL completo com os valores dos parâmetros.
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <returns>Uma string com o comando SQL. Retorna null caso não exista parâmetros na consulta.</returns>
+        public string? QueryText(string sql)
+        {
+            var conexao = new SqlServerConnectionManager(_connString, sql);
+            var resultado = conexao.QueryText(parametros.Count == 0 ? null : parametros);
+            return resultado;
+        }
+
+        /// <summary>
+        /// Executa um comando SQL que retorna dados.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sql"></param>
+        /// <param name="mapeamento"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>O objeto de mapeamento.</returns>
         public Task<T?> QueryAsync<T>(string sql, Func<SqlDataReader, T> mapeamento, CancellationToken cancellationToken)
         {
             var conexao = new SqlServerConnectionManager(_connString, sql);
@@ -23,6 +46,14 @@ namespace RawSqlLib
             return resultado;
         }
 
+        /// <summary>
+        /// Executa um comando SQL que não retorna dados.
+        /// 
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="cancellationToken"></param>
+        /// <param name="fullSql"></param>
+        /// <returns></returns>
         public Task<bool> NonQueryAsync(string sql, CancellationToken cancellationToken)
         {
             var conexao = new SqlServerConnectionManager(_connString, sql);
@@ -31,6 +62,15 @@ namespace RawSqlLib
             return resultado;
         }
 
+        /// <summary>
+        /// Executa uma transação com uma lista de comandos SQL.
+        /// Fecha ou executa rollback automático em caso de sucesso ou falha da transação.
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>Retorna true se todos os comandos forem executados com sucesso. Caso contrário, retorna false.
+        /// Caso algum erro ocorra, uma exceção do tipo RawSqlException será lançada.</returns>
+        /// <exception cref="RawSqlException"></exception>
         public Task<bool> TransactionAsync(string[] sql, CancellationToken cancellationToken)
         {
             var conexao = new SqlServerConnectionManager(_connString, sql);
@@ -39,14 +79,26 @@ namespace RawSqlLib
             return resultado;
         }
 
+        /// <summary>
+        /// Adiciona um parâmetro NULLABLE à lista de parâmetros.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="dbType"></param>
+        /// <param name="value"></param>
         public void AddNullableParam(string name, SqlDbType dbType, object? value)
         {
             parametros.Add(new SqlParam { ParamName = name, ParamDbType = dbType, ParamValue = value });
         }
 
-        public void AddParam(string name, SqlDbType dbType, object value)
+        /// <summary>
+        /// Adiciona um parâmetro à lista de parâmetros.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="dbType"></param>
+        /// <param name="value"></param>
+        public void AddParam(string name, SqlDbType dbType, object value, bool withoutQuote = false)
         {
-            parametros.Add(new SqlParam { ParamName = name, ParamDbType = dbType, ParamValue = value });
+            parametros.Add(new SqlParam { ParamName = name, ParamDbType = dbType, ParamValue = value, WithoutQuote = withoutQuote });
         }
     }
 }
