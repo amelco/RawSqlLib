@@ -7,7 +7,7 @@ namespace RawSqlLib
     [ExcludeFromCodeCoverage]
     public class SqlParam
     {
-        public string ParamName { get; set; }
+        public string ParamName { get; set; } = "";
         public SqlDbType ParamDbType { get; set; }
         public object? ParamValue { get; set; }
         public bool WithoutQuote { get; set; } = false;
