@@ -10,10 +10,12 @@ namespace RawSqlLib
         public readonly string _connString = "";
         private List<SqlParam> parametros = new();
         private bool _debug = false;
+        private DatabaseType _databaseType = DatabaseType.SQLServer;
 
-        public RawSql(string connString, bool debug = false)
+        public RawSql(string connString, DatabaseType databaseType, bool debug = false)
         {
             _connString = connString;
+            _databaseType = databaseType;
             _debug = debug;
         }
 
@@ -25,9 +27,17 @@ namespace RawSqlLib
         /// <returns>Uma string com o comando SQL. Retorna null caso não exista parâmetros na consulta.</returns>
         public string? QueryText(string sql)
         {
-            var conexao = new SqlServerConnectionManager(_connString, sql);
+            IDatabaseConnection? conexao = null;
+            if (_databaseType == DatabaseType.SQLServer)
+                conexao = new SqlServerConnectionManager(_connString, sql);
+            if (_databaseType == DatabaseType.SQLLite)
+                conexao = new SqlLiteConnectionManager(_connString, sql);
+
+            if (conexao is null) return null;
+
             var resultado = conexao.QueryText(parametros.Count == 0 ? null : parametros);
             return resultado;
+
         }
 
         /// <summary>
