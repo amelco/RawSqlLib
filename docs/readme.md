@@ -40,8 +40,19 @@ public class ExampleRepository
         // Only return true if ALL operations are succesfull
         public async Task<bool> Transaction(string[] sql, CancellationToken cancellationToken)
         {
-            bool success = sql.TransactionAsync(new string[] { "INSERT INTO Example VALUES ('A Value');", "INSERT INTO AnotheTable VALUES ( 'Another Value');" }, CancellationToken.None).Result;
+            bool success = await sql.TransactionAsync(new string[] { "INSERT INTO Example VALUES ('A Value');", "INSERT INTO AnotheTable VALUES ( 'Another Value');" }, CancellationToken.None);
             return success;
+        }
+
+        // Getting id of an inserted record
+        public async Task<int> Transaction(string[] sql, CancellationToken cancellationToken)
+        {
+            int? new_id = await sql.ExecuteScalarAsync<int>("INSERT INTO Example OUTPUT INSERTED.id VALUES ('B Value')", CancellationToken.None);
+            if (new_id is null)
+            {
+                // Logging message indicating that the record was not inserted
+            }
+            return new_id;
         }
 
         private Example ExampleMapping(SqlDataReader reader)
