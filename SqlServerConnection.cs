@@ -110,6 +110,21 @@ namespace RawSqlLib
             return true;
         }
 
+        public async Task<T?> ExecuteScalarAsync<T>(List<SqlParam>? parametros, CancellationToken cancellationToken)
+        {
+            var sql = QueryText(parametros);
+            if (sql is null)
+            {
+                return default(T);
+            }
+
+            var retorno = await _comando!.ExecuteScalarAsync(cancellationToken);
+
+            Fecha();
+
+            return (T)retorno;
+        }
+
         public async Task<bool> ExecuteTransactionAsync(string[] sql, CancellationToken cancellationToken)
         {
             if (_comando is null || transacao is null)
