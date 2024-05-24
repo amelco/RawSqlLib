@@ -57,8 +57,23 @@ namespace RawSqlLib
         }
 
         /// <summary>
+        /// Executa um comando SQL que retorna um dado apenas.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sql"></param>
+        /// <param name="mapeamento"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>Um objeto do tipo definido.</returns>
+        public Task<T?> ExecuteScalarAsync<T>(string sql, CancellationToken cancellationToken)
+        {
+            var conexao = new SqlServerConnectionManager(_connString, sql);
+            Task<T?> resultado = conexao.ExecuteScalarAsync<T>(parametros.Count == 0 ? null : parametros, cancellationToken);
+            parametros.Clear();
+            return resultado;
+        }
+
+        /// <summary>
         /// Executa um comando SQL que não retorna dados.
-        /// 
         /// </summary>
         /// <param name="sql"></param>
         /// <param name="cancellationToken"></param>
