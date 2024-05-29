@@ -19,7 +19,12 @@ namespace RawSqlLib
             _debug = debug;
         }
 
-
+        public static TEntidade? QueryStatic<TEntidade>(string _connString, DatabaseType dbType, string sql, List<SqlParam>? parametros, Func<SqlDataReader, TEntidade> mapeamento)
+        {
+           var res = SqlGeneralConnection.Query<TEntidade>(_connString, dbType, sql, parametros, mapeamento);
+           return res;
+        }
+        
         /// <summary>
         /// Retorna o comando SQL completo com os valores dos parâmetros.
         /// </summary>
@@ -30,8 +35,8 @@ namespace RawSqlLib
             IDatabaseConnection? conexao = null;
             if (_databaseType == DatabaseType.SQLServer)
                 conexao = new SqlServerConnectionManager(_connString, sql);
-            if (_databaseType == DatabaseType.SQLLite)
-                conexao = new SqlLiteConnectionManager(_connString, sql);
+            //if (_databaseType == DatabaseType.SQLLite)
+            //    conexao = new SqlLiteConnectionManager(_connString, sql);
 
             if (conexao is null) return null;
 
