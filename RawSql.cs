@@ -4,6 +4,13 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace RawSqlLib
 {
+    public class SqlConfig
+    {
+        public string ConnectionString { get; set; } = "";
+        public DatabaseType DatabaseType { get; set; } = DatabaseType.SQLServer;
+        public bool Debug { get; set; } = false;
+    }
+
     [ExcludeFromCodeCoverage]
     public class RawSql
     {
@@ -19,10 +26,9 @@ namespace RawSqlLib
             _debug = debug;
         }
 
-        public static TEntidade? QueryStatic<TEntidade>(string _connString, DatabaseType dbType, string sql, List<SqlParam>? parametros, Func<SqlDataReader, TEntidade> mapeamento)
+        public static TEntidade? QueryStatic<TEntidade>(SqlConfig cfg, string sql, List<SqlParam>? parametros, Func<SqlDataReader, TEntidade> mapeamento)
         {
-           var res = SqlGeneralConnection.Query<TEntidade>(_connString, dbType, sql, parametros, mapeamento);
-           return res;
+           return SqlGeneralConnection.Query<TEntidade>(cfg.ConnectionString, cfg.DatabaseType, sql, parametros, mapeamento);
         }
         
         /// <summary>
