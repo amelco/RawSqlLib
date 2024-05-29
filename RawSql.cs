@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace RawSqlLib
 {
+    // TODO(Andre): Criar arquivo separado para essa classe
     public class SqlConfig
     {
         public string ConnectionString { get; set; } = "";
@@ -28,7 +29,12 @@ namespace RawSqlLib
 
         public static TEntidade? QueryStatic<TEntidade>(SqlConfig cfg, string sql, List<SqlParam>? parametros, Func<SqlDataReader, TEntidade> mapeamento)
         {
-           return SqlGeneralConnection.Query<TEntidade>(cfg.ConnectionString, cfg.DatabaseType, sql, parametros, mapeamento);
+           return SqlGeneralConnection.Query<TEntidade>(cfg, sql, parametros, mapeamento);
+        }
+
+        public static void AddParamStatic(ref List<SqlParam> parametros, SqlDbType dbType, string name, object value, bool withoutQuote = false)
+        {
+            parametros.Add(new SqlParam { ParamName = name, ParamDbType = dbType, ParamValue = value, WithoutQuote = withoutQuote });
         }
         
         /// <summary>

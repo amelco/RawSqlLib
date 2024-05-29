@@ -33,22 +33,25 @@ namespace RawSqlLib
         }
 */
 
-        public static TEntidade? Query<TEntidade>(string connString, DatabaseType dbType, string sql, List<SqlParam>? parametros, Func<SqlDataReader, TEntidade> mapeamento)
+        public static TEntidade? Query<TEntidade>(SqlConfig cfg, string sql, List<SqlParam>? parametros, Func<SqlDataReader, TEntidade> mapeamento)
         {
             SqlConnection? conexao = null;
             SqlDataReader reader = null;
-            Abre(ref conexao, connString);
+
+            Abre(ref conexao, cfg.ConnectionString);
             if (conexao is null)
             {
                 Fecha(ref reader, ref conexao);
                 throw new Exception("Erro ao estabelecer conexão com o banco de dados.");
             }
+
             SqlCommand? comando = new SqlCommand(sql, conexao);
             if (comando == null)
             {
                 Fecha(ref reader, ref conexao);
                 throw new Exception("Erro ao criar comando SQL.");
             }
+            
             comando.Parameters.Clear();
             if (parametros is not null && parametros.Count > 0)
             {
@@ -58,15 +61,14 @@ namespace RawSqlLib
                 }
             }
             
-            reader = comando!.ExecuteReader();
-
-            if (reader is null)
+            if (cfg.Debug)
             {
-                Fecha(ref reader, ref conexao);
-                return default(TEntidade);
+                string fullSql = GetFullSqlString(comando.CommandText, parametros);
+                Console.WriteLine(fullSql);
             }
 
-            if (reader.HasRows is false)
+            reader = comando!.ExecuteReader();
+            if (reader is null || reader.HasRows is false)
             {
                 Fecha(ref reader, ref conexao);
                 return default(TEntidade);
@@ -190,7 +192,6 @@ namespace RawSqlLib
                 }
             }
             if (sql[sql.Length - 1] != ';') sql += ";";
-            Console.WriteLine(sql);
             return sql;
         }
     }
